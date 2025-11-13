@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "asklocal-backend/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "asklocal-backend/dist/server.js"
+    }
+  ]
+}

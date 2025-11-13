@@ -1,5 +1,4 @@
 import axios from "axios";
-import xml2js from "xml2js";
 
 export const sendMortgageCoachSOAP = async (
   firstName: string,
