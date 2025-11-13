@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    
     "start": "node dist/server.js",
     "start:prod": "node dist/server.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -30,7 +31,10 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.3",
-    "@types/xml2js": "^0.4.14"
+    "@types/xml2js": "^0.4.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
