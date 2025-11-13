@@ -8,6 +8,9 @@ export const sendMortgageCoachSOAP = async (
   zipCode: string
 ) => {
   const date = new Date().toISOString().split("T")[0];
+    const API_KEY = process.env.MC_API_KEY;
+  const APP_KEY = process.env.MC_APP_KEY;
+  const USERNAME = process.env.MC_USERNAME;
 
   const propertyTax = price * 0.018;
   const homeownersInsuranceMonthly = 150;
@@ -17,14 +20,14 @@ export const sendMortgageCoachSOAP = async (
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://com.mortgagecoach.edgeinterface">
     <soap:Header>
         <AuthHeader>
-            <APIKey>ba974edd92e3d517</APIKey>
-            <applicationKey>9611b597c0b805cb34c1</applicationKey>
+            <APIKey>${API_KEY}</APIKey>
+            <applicationKey>${APP_KEY}</applicationKey>
         </AuthHeader>
     </soap:Header>
     <soap:Body>
         <saveEnterpriseClient xmlns="http://com.mortgagecoach.edgeinterface">
             <reportType>0</reportType>
-            <userName>brad@asklocal.com</userName>
+            <userName>${USERNAME}</userName>
             <client>
                 <clientId xsi:nil="true"/>
                 <contact>
@@ -165,7 +168,7 @@ export const sendMortgageCoachSOAP = async (
     }
   );
 
-  console.log("SOAP RESPONSE:");
+  console.log("SOAP RESPONSE:", response.data);
 
   return response.data;
 };
