@@ -26,7 +26,7 @@ app.options("*", (req, res) => {
 // ---------------------------------------------
 app.use(
   cors({
-    origin: "https://asklocal-client-frontend.vercel.app", // only allow your frontend
+    origin: "https://asklocal-client-frontend.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
