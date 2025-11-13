@@ -1,14 +1,37 @@
 import app from "./app";
-import { VercelRequest, VercelResponse } from "@vercel/node";
 import { connectDB } from "./db";
 
+// Detect if running on Vercel serverless
+const isVercel = !!process.env.VERCEL;
+
+// Cache DB connection in memory for Vercel
 let isConnected = false;
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (!isConnected) {
-    await connectDB();
-    isConnected = true;
-  }
+export default async function handler(req: any, res: any) {
+  // Vercel serverless mode
+  if (isVercel) {
+    if (!isConnected) {
+      await connectDB();
+      isConnected = true;
+    }
 
-  return (app as any)(req, res);
+    // Let Express handle everything
+    return (app as any)(req, res);
+  }
+}
+
+// LOCAL DEVELOPMENT MODE -->
+if (!isVercel) {
+  (async () => {
+    try {
+      await connectDB();
+      const port = process.env.PORT || 5000;
+
+      app.listen(port, () => {
+        console.log(`🚀 Local server running at http://localhost:${port}`);
+      });
+    } catch (error) {
+      console.error("❌ Local server failed:", error);
+    }
+  })();
 }

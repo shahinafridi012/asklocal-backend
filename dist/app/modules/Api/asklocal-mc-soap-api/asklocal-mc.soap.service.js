@@ -1,21 +1,15 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMortgageCoachSOAP = void 0;
 const axios_1 = __importDefault(require("axios"));
-const sendMortgageCoachSOAP = (firstName, lastName, email, price, zipCode) => __awaiter(void 0, void 0, void 0, function* () {
+const sendMortgageCoachSOAP = async (firstName, lastName, email, price, zipCode) => {
     const date = new Date().toISOString().split("T")[0];
+    const API_KEY = process.env.MC_API_KEY;
+    const APP_KEY = process.env.MC_APP_KEY;
+    const USERNAME = process.env.MC_USERNAME;
     const propertyTax = price * 0.018;
     const homeownersInsuranceMonthly = 150;
     const homeownersInsuranceAnnual = homeownersInsuranceMonthly * 12;
@@ -23,14 +17,14 @@ const sendMortgageCoachSOAP = (firstName, lastName, email, price, zipCode) => __
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://com.mortgagecoach.edgeinterface">
     <soap:Header>
         <AuthHeader>
-            <APIKey>ba974edd92e3d517</APIKey>
-            <applicationKey>9611b597c0b805cb34c1</applicationKey>
+            <APIKey>${API_KEY}</APIKey>
+            <applicationKey>${APP_KEY}</applicationKey>
         </AuthHeader>
     </soap:Header>
     <soap:Body>
         <saveEnterpriseClient xmlns="http://com.mortgagecoach.edgeinterface">
             <reportType>0</reportType>
-            <userName>brad@asklocal.com</userName>
+            <userName>${USERNAME}</userName>
             <client>
                 <clientId xsi:nil="true"/>
                 <contact>
@@ -158,13 +152,13 @@ const sendMortgageCoachSOAP = (firstName, lastName, email, price, zipCode) => __
         </saveEnterpriseClient>
     </soap:Body>
 </soap:Envelope>`;
-    const response = yield axios_1.default.post("https://edge.mortgagecoach.com/EdgeInterface/EdgeInterface.asmx", xml, {
+    const response = await axios_1.default.post("https://edge.mortgagecoach.com/EdgeInterface/EdgeInterface.asmx", xml, {
         headers: {
             "Content-Type": "text/xml",
             "SOAPAction": '"http://com.mortgagecoach.edgeinterface/saveEnterpriseClient"',
         },
     });
-    console.log("SOAP RESPONSE:");
+    console.log("SOAP RESPONSE:", response.data);
     return response.data;
-});
+};
 exports.sendMortgageCoachSOAP = sendMortgageCoachSOAP;
