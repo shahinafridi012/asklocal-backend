@@ -7,22 +7,10 @@ dotenv.config();
 
 const app: Application = express();
 
-// Body parser
 app.use(express.json());
 
-// -------------------------------------------------
-// FIXED OPTIONS HANDLER for Vercel + Express
-// -------------------------------------------------
-app.options("/*", (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://asklocal-client-frontend.vercel.app");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  return res.status(200).end();
-});
-
 // ---------------------------------------------
-// Main CORS middleware
+// ONLY THIS CORS MIDDLEWARE — NOTHING ELSE
 // ---------------------------------------------
 app.use(
   cors({
@@ -33,7 +21,9 @@ app.use(
   })
 );
 
+// ---------------------------------------------
 // Routes
+// ---------------------------------------------
 app.use("/api/v1", router);
 
 // Test route
