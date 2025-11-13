@@ -1,20 +1,18 @@
 import app from "./app";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { connectDB } from "./db";
 
-async function main() {
-  try {
+let isConnected = false;
+
+// This function will run for every request on Vercel
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+
+  // Connect DB only once (Vercel optimization)
+  if (!isConnected) {
     await connectDB();
-
-    const port = process.env.PORT || 5000;
-
-    app.listen(port, () => {
-      console.log(`🚀 Server running on http://localhost:${port}`);
-    });
-
-  } catch (error) {
-    console.error("❌ Server startup failed:", error);
-    process.exit(1);
+    isConnected = true;
   }
-}
 
-main();
+  // Let Express handle the request
+  return (app as any)(req, res);
+}
