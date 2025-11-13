@@ -7,8 +7,13 @@ dotenv.config();
 
 const app: Application = express();
 
-// ---- FIXED CORS ----
+// Middleware
 app.use(express.json());
+
+// IMPORTANT: Handle OPTIONS manually for Vercel
+app.options("*", cors());
+
+// Main CORS
 app.use(
   cors({
     origin: [
@@ -23,11 +28,7 @@ app.use(
   })
 );
 
-// Handle preflight requests explicitly
-
-// ---- Body Parser ----
-
-// ---- Routes ----
+// Routes
 app.use("/api/v1", router);
 
 // Test route
