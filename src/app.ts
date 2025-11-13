@@ -10,10 +10,10 @@ const app: Application = express();
 // Body parser
 app.use(express.json());
 
-// ---------------------------------------------
-// 🟢 FIX #1: Manually handle ALL OPTIONS requests
-// ---------------------------------------------
-app.options("*", (req, res) => {
+// -------------------------------------------------
+// FIXED OPTIONS HANDLER for Vercel + Express
+// -------------------------------------------------
+app.options("/*", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "https://asklocal-client-frontend.vercel.app");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -22,7 +22,7 @@ app.options("*", (req, res) => {
 });
 
 // ---------------------------------------------
-// 🟢 FIX #2: Main CORS middleware
+// Main CORS middleware
 // ---------------------------------------------
 app.use(
   cors({
@@ -33,9 +33,7 @@ app.use(
   })
 );
 
-// ---------------------------------------------
 // Routes
-// ---------------------------------------------
 app.use("/api/v1", router);
 
 // Test route
