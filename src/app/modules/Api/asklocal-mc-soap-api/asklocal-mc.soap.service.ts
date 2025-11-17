@@ -168,7 +168,7 @@ export const sendMortgageCoachSOAP = async (
     }
   );
 
-  console.log("SOAP RESPONSE:", response.data);
+  console.log("SOAP RESPONSE OkAy");
 
   return response.data;
 };

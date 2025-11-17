@@ -9,12 +9,19 @@ const app: Application = express();
 
 app.use(express.json());
 
-// ---------------------------------------------
-// ONLY THIS CORS MIDDLEWARE — NOTHING ELSE
-// ---------------------------------------------
+// ✅ CORS — allow only one origin at a time
+const allowedOrigins = [
+  "https://asklocal-client-frontend.vercel.app",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: "https://asklocal-client-frontend.vercel.app",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow Postman/servers
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
