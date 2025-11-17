@@ -13,4 +13,8 @@ import { connectDB } from "./db";
   } catch (error) {
     console.error("❌ Server failed to start:", error);
   }
+<<<<<<< HEAD
 })();
+=======
+})();
+>>>>>>> 4b617529b82b7f545e8b28b619da540c332c38c3
