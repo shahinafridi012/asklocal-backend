@@ -11,7 +11,7 @@ export class MoxoService {
     firstName: string;
     lastName: string;
     email: string;
-    flowType: "buyer" | "seller" | "refinance" | "agent";
+    flowType: "buyer" | "seller" | "refinance" ;
   }) {
     try {
       const MOXO_BASE_URL =
@@ -28,7 +28,7 @@ export class MoxoService {
       if (!templateId) throw new Error(`Invalid or missing template for ${flowType}`);
 
       const payload = {
-        workspace_name: `AskLocal ${flowType} - ${firstName} ${lastName}`,
+        workspace_name: `${firstName}${lastName}-AskLocal ${flowType}`,
         workspace_owner: process.env.MOXO_WORKSPACE_OWNER_EMAIL!,
         workspace_description: `New ${flowType} inquiry from AskLocal.`,
         welcome_message: `Welcome ${firstName}, your concierge workspace is ready!`,
