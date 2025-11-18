@@ -1,5 +1,5 @@
-import { IZapierData } from "./GetStoreFrontAgentZeppier.interface";
-import { ZapierModel } from "./GetStoreFrontAgentZeppier.model";
+import { IZapierData } from "./GetListingsByZeppier.interface";
+import { ZapierModel } from "./GetListingsByZeppier.model";
 
 export class ZapierService {
   static async saveData(payload: any): Promise<IZapierData> {

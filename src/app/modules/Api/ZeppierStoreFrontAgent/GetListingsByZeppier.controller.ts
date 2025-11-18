@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ZapierService } from "./GetStoreFrontAgentByZeppier.service";
+import { ZapierService } from "./GetListingsAgentByZeppier.service";
 
 export class ZapierController {
   static async receive(req: Request, res: Response) {

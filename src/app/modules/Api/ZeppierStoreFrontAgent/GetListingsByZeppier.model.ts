@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IZapierData } from "./GetStoreFrontAgentZeppier.interface";
+import { IZapierData } from "./GetListingsByZeppier.interface";
 
 const ZapierSchema = new Schema<IZapierData>(
   {
