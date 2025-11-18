@@ -8,7 +8,7 @@ const UserFlowSchema = new Schema<IUserFlowDocument>(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    flowType: { type: String, enum: ["buyer", "seller", "refinance", "agent"] },
+    flowType: { type: String, enum: ["buyer", "seller", "refinance"] },
     code: { type: String },
     verified: { type: Boolean, default: false },
   },
