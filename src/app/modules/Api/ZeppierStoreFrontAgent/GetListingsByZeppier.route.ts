@@ -1,9 +1,21 @@
 import { Router } from "express";
-import { ZapierController } from "./GetListingsByZeppier.controller";
+import { CheckUpload, UploadImages, WebhookListings } from "./GetListingsByZeppier.controller";
+import { upload } from "../../../middlewares/multer";
+
 
 const router = Router();
 
-router.post("/all-listings", ZapierController.receive);
-router.get("/listings", ZapierController.list);
+// Zapier → Send property details
+router.post("/webhook", WebhookListings);
 
-export const GetStoreFrontAgent = router;
+// Frontend → Validate link
+router.get("/upload/:id", CheckUpload);
+
+// Frontend → Upload images
+router.post(
+  "/upload/:id/images",
+  upload.array("images"),    // <-- UNLIMITED FILES, NO LIMIT
+  UploadImages
+);
+
+export const ListingsRoutes = router;

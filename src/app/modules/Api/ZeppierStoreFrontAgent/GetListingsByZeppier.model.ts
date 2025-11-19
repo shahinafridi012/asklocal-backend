@@ -1,11 +1,16 @@
 import { Schema, model } from "mongoose";
-import { IZapierData } from "./GetListingsByZeppier.interface";
+import { IListings } from "./GetListingsByZeppier.interface";
 
-const ZapierSchema = new Schema<IZapierData>(
+const ListingsSchema = new Schema<IListings>(
   {
     data: { type: Object, required: true },
+    expiresAt: { type: Date, default: null },
+    images: { type: [String], default: [] },
   },
   { timestamps: true }
 );
 
-export const ZapierModel = model<IZapierData>("ZapierData", ZapierSchema);
+// Auto-delete after expiresAt
+ListingsSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+export const ListingsModel = model<IListings>("Listings", ListingsSchema);

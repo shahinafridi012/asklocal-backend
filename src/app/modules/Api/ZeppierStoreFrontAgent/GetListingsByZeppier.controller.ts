@@ -1,36 +1,102 @@
-import { Request, Response } from "express";
-import { ZapierService } from "./GetListingsAgentByZeppier.service";
+import catchAsync from "../../../utils/catchAsync";
+import sendResponse from "../../../utils/sendResponse";
+import httpStatus from "http-status";
+import { uploadToS3 } from "../../../shared/s3Upload";
+import { ListingsService } from "./GetListingsAgentByZeppier.service";
 
-export class ZapierController {
-  static async receive(req: Request, res: Response) {
-    try {
-      console.log("🔔 Zapier Webhook Received:", req.body);
+const FRONTEND_BASE_URL =
+  process.env.FRONTEND_BASE_URL || "http://localhost:3000";
 
-      const savedData = await ZapierService.saveData(req.body);
+// 1) Zapier webhook → save listing + create 24h upload URL
+export const WebhookListings = catchAsync(async (req, res) => {
+  const payload = req.body;
 
-      return res.status(200).json({
-        success: true,
-        message: "Zapier data saved successfully",
-        data: savedData,
-      });
-    } catch (error) {
-      console.error("❌ Webhook Error:", error);
-      return res.status(500).json({ success: false, error });
-    }
+  console.log("🔥 New Listing From Zapier:", payload);
+
+  const listing = await ListingsService.saveListing(payload);
+
+  await ListingsService.setExpiry(listing._id, 24); // 24 hours
+
+  const uploadUrl = `${FRONTEND_BASE_URL}/upload/${listing._id}`;
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Listing saved! Share upload URL with user.",
+    data: {
+      listingId: listing._id,
+      uploadUrl,
+      expiresIn: "24 hours",
+    },
+  });
+});
+
+// 2) Validate upload link
+export const CheckUpload = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const listing = await ListingsService.getListingById(id);
+
+  if (!listing)
+    return sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "Invalid upload link",
+      data: undefined,
+    });
+
+  if (listing.expiresAt && listing.expiresAt < new Date())
+    return sendResponse(res, {
+      statusCode: httpStatus.GONE,
+      success: false,
+      message: "Upload link expired",
+      data: undefined,
+    });
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Upload link valid",
+    data: listing,
+  });
+});
+
+// 3) Upload images → S3 → Save URLs
+export const UploadImages = catchAsync(async (req: any, res) => {
+  const files = req.files;
+  const { id } = req.params;
+
+  if (!files || files.length === 0) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: "No images uploaded",
+      data: undefined
+    });
   }
 
-  static async list(req: Request, res: Response) {
-    try {
-      const records = await ZapierService.getAll();
+  console.log("📸 Total images uploaded:", files.length);
 
-      return res.status(200).json({
-        success: true,
-        count: records.length,
-        data: records,
-      });
-    } catch (error) {
-      console.error("❌ List Error:", error);
-      return res.status(500).json({ success: false, error });
-    }
+  const urls: string[] = [];
+
+  for (const file of files) {
+    const url = await uploadToS3(file);
+    urls.push(url);
   }
-}
+
+  // 🔥 SAVE IMAGES INSIDE DATABASE
+  const updatedListing = await ListingsService.addImages(id, urls);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Images uploaded successfully!",
+    data: {
+      listingId: id,
+      count: urls.length,
+      images: updatedListing?.images || urls
+    },
+  });
+});
+
+
