@@ -14,8 +14,9 @@ router.get("/upload/:id", CheckUpload);
 // Frontend → Upload images
 router.post(
   "/upload/:id/images",
-  upload.array("images"),    // <-- UNLIMITED FILES, NO LIMIT
+  upload.array("images"),
   UploadImages
 );
+
 
 export const ListingsRoutes = router;

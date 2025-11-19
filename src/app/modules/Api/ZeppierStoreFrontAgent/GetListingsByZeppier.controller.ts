@@ -3,6 +3,8 @@ import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { uploadToS3 } from "../../../shared/s3Upload";
 import { ListingsService } from "./GetListingsAgentByZeppier.service";
+import path from "path";
+import * as unzipper from "unzipper";
 
 const FRONTEND_BASE_URL =
   process.env.FRONTEND_BASE_URL || "http://localhost:3000";
@@ -70,31 +72,73 @@ export const UploadImages = catchAsync(async (req: any, res) => {
     return sendResponse(res, {
       statusCode: 400,
       success: false,
-      message: "No images uploaded",
+      message: "No files uploaded",
       data: undefined
     });
   }
 
-  console.log("📸 Total images uploaded:", files.length);
+  const imageUrls: string[] = [];
 
-  const urls: string[] = [];
+  // Batch uploader to avoid overload
+  const uploadBatch = async (batch: any[]) => {
+    const results = await Promise.all(batch.map((f) => uploadToS3(f)));
+    imageUrls.push(...results);
+  };
 
   for (const file of files) {
-    const url = await uploadToS3(file);
-    urls.push(url);
+    // ZIP case
+    if (
+      file.mimetype === "application/zip" ||
+      file.mimetype === "application/x-zip-compressed"
+    ) {
+      console.log("📦 ZIP detected → extracting images...");
+
+      const directory = await unzipper.Open.buffer(file.buffer);
+      const extractedImages: any[] = [];
+
+      for (const entry of directory.files) {
+        const fileName = entry.path.toLowerCase();
+
+        if (
+          fileName.endsWith(".jpg") ||
+          fileName.endsWith(".jpeg") ||
+          fileName.endsWith(".png") ||
+          fileName.endsWith(".webp")
+        ) {
+          const buffer = await entry.buffer();
+          extractedImages.push({
+            buffer,
+            originalname: path.basename(entry.path),
+            mimetype: "image/jpeg",
+          });
+        }
+      }
+
+      console.log("📸 Extracted images from ZIP:", extractedImages.length);
+
+      // Upload ZIP images in batches of 3
+      for (let i = 0; i < extractedImages.length; i += 3) {
+        const batch = extractedImages.slice(i, i + 3);
+        await uploadBatch(batch);
+      }
+    } else {
+      // Normal image upload
+      const url = await uploadToS3(file);
+      imageUrls.push(url);
+    }
   }
 
-  // 🔥 SAVE IMAGES INSIDE DATABASE
-  const updatedListing = await ListingsService.addImages(id, urls);
+  // Save URLs to database
+  await ListingsService.addImages(id, imageUrls);
 
   return sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Images uploaded successfully!",
+    message: `Uploaded ${imageUrls.length} images successfully!`,
     data: {
       listingId: id,
-      count: urls.length,
-      images: updatedListing?.images || urls
+      count: imageUrls.length,
+      images: imageUrls,
     },
   });
 });
