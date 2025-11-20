@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CheckUpload, UploadImages, WebhookListings } from "./GetListingsByZeppier.controller";
+import { CheckUpload, GetAllListings, GetSingleListing, UploadImages, WebhookListings } from "./GetListingsByZeppier.controller";
 import { upload } from "../../../middlewares/multer";
 
 
@@ -17,6 +17,9 @@ router.post(
   upload.array("images"),
   UploadImages
 );
+
+router.get("/all", GetAllListings);
+router.get("/:id", GetSingleListing);
 
 
 export const ListingsRoutes = router;

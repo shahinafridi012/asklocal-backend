@@ -24,7 +24,7 @@ export const WebhookListings = catchAsync(async (req, res) => {
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing saved! Share upload URL with user.",
+    message: "Listing saved Upload Your images Usings This Url",
     data: {
       listingId: listing._id,
       uploadUrl,
@@ -73,7 +73,7 @@ export const UploadImages = catchAsync(async (req: any, res) => {
       statusCode: 400,
       success: false,
       message: "No files uploaded",
-      data: undefined
+      data: undefined,
     });
   }
 
@@ -142,5 +142,35 @@ export const UploadImages = catchAsync(async (req: any, res) => {
     },
   });
 });
+export const GetAllListings = catchAsync(async (req, res) => {
+  const listings = await ListingsService.getAllListings();
 
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "All listings retrieved",
+    data: listings,
+  });
+});
 
+export const GetSingleListing = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const listing = await ListingsService.getSingleListingFormatted(id);
+
+  if (!listing) {
+    return sendResponse(res, {
+      statusCode: 404,
+      success: false,
+      message: "Listing not found",
+      data: null,
+    });
+  }
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Listing retrieved",
+    data: listing,
+  });
+});

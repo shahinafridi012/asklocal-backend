@@ -21,4 +21,38 @@ export class ListingsService {
       { new: true }
     );
   }
+
+  // NEW: Get all listings fully formatted
+  static async getAllListings() {
+    const listings = await ListingsModel.find().lean();
+
+    return listings.map((l: any) => {
+      const banner = l.images?.length ? l.images[0] : null;
+
+      return {
+        _id: l._id,
+        banner,
+        images: l.images || [],
+        expiresAt: l.expiresAt,
+        data: l.data,
+      };
+    });
+  }
+
+  // ⭐ NEW: Get one listing formatted (banner + images)
+  static async getSingleListingFormatted(id: string) {
+    const listing = await ListingsModel.findById(id).lean();
+
+    if (!listing) return null;
+
+    const banner = listing.images?.length ? listing.images[0] : null;
+
+    return {
+      _id: listing._id,
+      banner,
+      images: listing.images || [],
+      expiresAt: listing.expiresAt,
+      data: listing.data,
+    };
+  }
 }
