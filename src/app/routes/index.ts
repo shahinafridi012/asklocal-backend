@@ -3,7 +3,8 @@ import { Router } from "express";
 import { AsklocalMcSoapUserRoutes } from "../modules/Api/asklocal-mc-soap-api/asklocal-mc.route";
 import { AccessYourConcisergeFlow } from "../modules/Api/AccessYourConcisergeFlow/UserFlow.route";
 import { PartnerFlowRoutes } from "../modules/Api/BecomeAnAsklocalPartnerFlow/asklocalPartner.route";
-import { ListingsRoutes } from "../modules/Api/ZeppierStoreFrontAgent/GetListingsByZeppier.route";
+import { ListingsRoutes } from "../modules/Api/ZeppierListings/GetListingsByZeppier.route";
+import { SentryError } from "../modules/Main-Site/SentryError/SentryError.route";
 
 const router = Router();
 
@@ -23,6 +24,10 @@ const moduleRoutes = [
  {
     path: "/listings",   // ✅ FIXED
     route: ListingsRoutes,
+  },
+ {
+    path: "/errors",   // ✅ FIXED
+    route: SentryError,
   },
 ];
 

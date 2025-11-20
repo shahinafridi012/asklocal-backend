@@ -1,8 +1,9 @@
 import app from "./app";
 import { connectDB } from "./db";
 import dotenv from "dotenv";
+
 dotenv.config();
-// Detect if running on Vercel serverless
+
 const isVercel = !!process.env.VERCEL;
 
 // Cache DB connection in memory for Vercel
