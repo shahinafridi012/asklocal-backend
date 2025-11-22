@@ -5,6 +5,7 @@ import { AccessYourConcisergeFlow } from "../modules/Api/AccessYourConcisergeFlo
 import { PartnerFlowRoutes } from "../modules/Api/BecomeAnAsklocalPartnerFlow/asklocalPartner.route";
 import { ListingsRoutes } from "../modules/Api/ZeppierListings/GetListingsByZeppier.route";
 import { SentryError } from "../modules/Main-Site/SentryError/SentryError.route";
+import { ListingAgentConnectRoutes } from "../modules/Api/AgentListingConnectFlow/agentListingConnect.route";
 
 const router = Router();
 
@@ -21,12 +22,16 @@ const moduleRoutes = [
     path: "/becomeanasklocal",
     route: PartnerFlowRoutes,
   },
- {
-    path: "/listings",   // ✅ FIXED
+  {
+    path: "/listings", // FIXED
     route: ListingsRoutes,
   },
- {
-    path: "/errors",   // ✅ FIXED
+  {
+    path: "/listing-agent-connect", // FIXED
+    route: ListingAgentConnectRoutes,
+  },
+  {
+    path: "/errors", // FIXED
     route: SentryError,
   },
 ];
