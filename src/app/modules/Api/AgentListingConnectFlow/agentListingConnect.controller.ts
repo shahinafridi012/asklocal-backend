@@ -29,9 +29,7 @@ export class ListingAgentConnectController {
       (err: any) => console.log("Email send error:", err)
     );
   });
-
   // VERIFY OTP
-
   static verifyCode = catchAsync(async (req, res) => {
     const { userEmail, code } = req.body;
 

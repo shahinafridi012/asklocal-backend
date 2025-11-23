@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { ListingAgentConnectInfo } from "./AgentListingConnect.interfcae";
+import { ListingAgentConnectInfo } from "./agentListingConnect.interfcae";
 
 const ListingAgentConnectSchema = new Schema<ListingAgentConnectInfo>(
   {

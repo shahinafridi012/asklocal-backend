@@ -6,6 +6,7 @@ import { PartnerFlowRoutes } from "../modules/Api/BecomeAnAsklocalPartnerFlow/as
 import { ListingsRoutes } from "../modules/Api/ZeppierListings/GetListingsByZeppier.route";
 import { SentryError } from "../modules/Main-Site/SentryError/SentryError.route";
 import { ListingAgentConnectRoutes } from "../modules/Api/AgentListingConnectFlow/agentListingConnect.route";
+import { GeneralSettingsRoute } from "../modules/Main-Site/GeneralSettings/generalsettings.route";
 
 const router = Router();
 
@@ -33,6 +34,10 @@ const moduleRoutes = [
   {
     path: "/errors", // FIXED
     route: SentryError,
+  },
+  {
+    path: "/general-settings", // FIXED
+    route: GeneralSettingsRoute,
   },
 ];
 

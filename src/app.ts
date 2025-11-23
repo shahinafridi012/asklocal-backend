@@ -20,6 +20,7 @@ app.use(express.json());
 const allowedOrigins = [
   "https://asklocal-client-frontend.vercel.app",
   "http://localhost:3000",
+  "http://localhost:3000",
 ];
 
 app.use(
