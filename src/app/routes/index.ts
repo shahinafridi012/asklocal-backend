@@ -7,6 +7,7 @@ import { ListingsRoutes } from "../modules/Api/ZeppierListings/GetListingsByZepp
 import { SentryError } from "../modules/Main-Site/SentryError/SentryError.route";
 import { ListingAgentConnectRoutes } from "../modules/Api/AgentListingConnectFlow/agentListingConnect.route";
 import { GeneralSettingsRoute } from "../modules/Main-Site/GeneralSettings/generalsettings.route";
+import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.route";
 
 const router = Router();
 
@@ -38,6 +39,10 @@ const moduleRoutes = [
   {
     path: "/general-settings", // FIXED
     route: GeneralSettingsRoute,
+  },
+  {
+    path: "/blog", // FIXED
+    route: BlogRoutes,
   },
 ];
 
