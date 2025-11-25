@@ -8,6 +8,7 @@ import { SentryError } from "../modules/Main-Site/SentryError/SentryError.route"
 import { ListingAgentConnectRoutes } from "../modules/Api/AgentListingConnectFlow/agentListingConnect.route";
 import { GeneralSettingsRoute } from "../modules/Main-Site/GeneralSettings/generalsettings.route";
 import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.route";
+import { AgentsRoute } from "../modules/Main-Site/AgentManagement/agent.route";
 
 const router = Router();
 
@@ -43,6 +44,10 @@ const moduleRoutes = [
   {
     path: "/blog", // FIXED
     route: BlogRoutes,
+  },
+  {
+    path: "/agents", // FIXED
+    route: AgentsRoute,
   },
 ];
 
