@@ -9,7 +9,7 @@ const router = express.Router();
 // Upload image to S3
 router.post("/upload", upload.single("file"), async (req, res) => {
   try {
-    const url = await uploadToS3(req.file!);
+    const url = await uploadToS3(req.file!,"blog");
     res.status(200).json({
       success: true,
       message: "Image uploaded successfully",

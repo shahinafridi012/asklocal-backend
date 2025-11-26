@@ -28,7 +28,7 @@ export const updateSettings = catchAsync(async (req, res) => {
 
 export const uploadSettingsImage = catchAsync(async (req, res) => {
   if (!req.file) throw new Error("No file uploaded");
-  const imageUrl = await uploadToS3(req.file);
+  const imageUrl = await uploadToS3(req.file, "listings");
 
   return sendResponse(res, {
     statusCode: httpStatus.CREATED,
