@@ -20,7 +20,7 @@ const s3 = new S3Client({
   },
 });
 
-export const uploadToS3 = async (file: Express.Multer.File) => {
+export const uploadToS3 = async (file: Express.Multer.File, p0: string) => {
   const key = `listings/${uuidv4()}-${file.originalname}`;
 
   await s3.send(

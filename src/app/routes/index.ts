@@ -9,6 +9,7 @@ import { ListingAgentConnectRoutes } from "../modules/Api/AgentListingConnectFlo
 import { GeneralSettingsRoute } from "../modules/Main-Site/GeneralSettings/generalsettings.route";
 import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.route";
 import { AgentsRoute } from "../modules/Main-Site/AgentManagement/agent.route";
+import { PagesRoute } from "../modules/Main-Site/HowToHub/Pages/page.route";
 
 const router = Router();
 
@@ -48,6 +49,10 @@ const moduleRoutes = [
   {
     path: "/agents", // FIXED
     route: AgentsRoute,
+  },
+  {
+    path: "/howtohub", // FIXED
+    route: PagesRoute,
   },
 ];
 
