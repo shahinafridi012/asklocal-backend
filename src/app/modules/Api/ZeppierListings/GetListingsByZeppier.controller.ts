@@ -81,7 +81,9 @@ export const UploadImages = catchAsync(async (req: any, res) => {
 
   // Batch uploader to avoid overload
   const uploadBatch = async (batch: any[]) => {
-    const results = await Promise.all(batch.map((f) => uploadToS3(f)));
+    const results = await Promise.all(
+      batch.map((f) => uploadToS3(f, "listings"))
+    );
     imageUrls.push(...results);
   };
 
@@ -123,7 +125,7 @@ export const UploadImages = catchAsync(async (req: any, res) => {
       }
     } else {
       // Normal image upload
-      const url = await uploadToS3(file);
+      const url = await uploadToS3(file, "listings");
       imageUrls.push(url);
     }
   }
