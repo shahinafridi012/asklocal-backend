@@ -9,9 +9,7 @@ import * as Tracing from "@sentry/tracing";
 import { ErrorLogService } from "./app/modules/Main-Site/SentryError/SentryError.service";
 
 dotenv.config();
-
 const app: Application = express();
-
 app.use(express.json());
 
 // ---------------------------------------------
@@ -19,6 +17,7 @@ app.use(express.json());
 // ---------------------------------------------
 const allowedOrigins = [
   "https://asklocal-client-frontend.vercel.app",
+  "https://asklocal-next-admin-frontend.vercel.app",
   "http://localhost:3000",
   "http://localhost:3000",
 ];
