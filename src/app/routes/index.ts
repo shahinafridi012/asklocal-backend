@@ -10,6 +10,7 @@ import { GeneralSettingsRoute } from "../modules/Main-Site/GeneralSettings/gener
 import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.route";
 import { AgentsRoute } from "../modules/Main-Site/AgentManagement/agent.route";
 import { PagesRoute } from "../modules/Main-Site/HowToHub/Pages/page.route";
+import { MetricsRoutes } from "../modules/Main-Site/metrics/metrics.route";
 
 const router = Router();
 
@@ -27,7 +28,7 @@ const moduleRoutes = [
     route: PartnerFlowRoutes,
   },
   {
-    path: "/listings", // FIXED
+    path: "/listings", // FIXED webhook
     route: ListingsRoutes,
   },
   {
@@ -53,6 +54,10 @@ const moduleRoutes = [
   {
     path: "/howtohub", // FIXED
     route: PagesRoute,
+  },
+  {
+    path: "/metrics", // FIXED
+    route: MetricsRoutes,
   },
 ];
 

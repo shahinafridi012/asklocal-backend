@@ -3,8 +3,11 @@
 import { ListingsModel } from "./GetListingsByZeppier.model";
 
 export class ListingsService {
+  static deleteImage: any;
   static async createFromZapier(payload: any, linkHours = 24) {
-    const uploadLinkExpiresAt = new Date(Date.now() + linkHours * 60 * 60 * 1000);
+    const uploadLinkExpiresAt = new Date(
+      Date.now() + linkHours * 60 * 60 * 1000
+    );
     return ListingsModel.create({
       data: payload,
       status: "pending",
@@ -44,7 +47,11 @@ export class ListingsService {
   static async expireIfNeeded(id: string) {
     const doc = await ListingsModel.findById(id);
     if (!doc) return null;
-    if (doc.uploadLinkExpiresAt && doc.uploadLinkExpiresAt < new Date() && doc.status === "pending") {
+    if (
+      doc.uploadLinkExpiresAt &&
+      doc.uploadLinkExpiresAt < new Date() &&
+      doc.status === "pending"
+    ) {
       doc.status = "expired";
       await doc.save();
     }
@@ -65,5 +72,15 @@ export class ListingsService {
 
   static async remove(id: string) {
     return ListingsModel.findByIdAndDelete(id);
+  }
+  static async updateListing(id: string, data: any, status?: string) {
+    return ListingsModel.findByIdAndUpdate(
+      id,
+      {
+        ...(data ? { data } : {}),
+        ...(status ? { status } : {}),
+      },
+      { new: true }
+    );
   }
 }

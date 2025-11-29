@@ -248,3 +248,49 @@ export const DeleteListing = catchAsync(async (req, res) => {
     data: removed,
   });
 });
+
+// 9 
+export const UpdateListing = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { data, status } = req.body;
+
+  const updated = await ListingsService.updateListing(id, data, status);
+
+  if (!updated) {
+    return sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "Listing not found",
+      data: null,
+    });
+  }
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Listing updated successfully",
+    data: updated,
+  });
+});
+// 10
+export const DeleteListingImage = catchAsync(async (req, res) => {
+  const { id, index } = req.params;
+
+  const updated = await ListingsService.deleteImage(id, Number(index));
+
+  if (!updated) {
+    return sendResponse(res, {
+      statusCode: httpStatus.NOT_FOUND,
+      success: false,
+      message: "Listing not found",
+      data: null,
+    });
+  }
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Image deleted successfully",
+    data: updated.images,
+  });
+});
