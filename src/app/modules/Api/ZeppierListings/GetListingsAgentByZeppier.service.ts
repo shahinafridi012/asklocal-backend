@@ -1,58 +1,69 @@
+// src/app/modules/listings/Listings.service.ts
+
 import { ListingsModel } from "./GetListingsByZeppier.model";
 
 export class ListingsService {
-  static async saveListing(payload: any) {
-    return ListingsModel.create({ data: payload });
+  static async createFromZapier(payload: any, linkHours = 24) {
+    const uploadLinkExpiresAt = new Date(Date.now() + linkHours * 60 * 60 * 1000);
+    return ListingsModel.create({
+      data: payload,
+      status: "pending",
+      uploadLinkExpiresAt,
+      images: [],
+    });
   }
 
-  static async setExpiry(id: string, hours: number) {
-    const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
-    return ListingsModel.findByIdAndUpdate(id, { expiresAt }, { new: true });
-  }
-
-  static async getListingById(id: string) {
+  static async getById(id: string) {
     return ListingsModel.findById(id);
   }
 
-  static async addImages(id: string, images: string[]) {
+  static async getOneLean(id: string) {
+    return ListingsModel.findById(id).lean();
+  }
+
+  static async addImagesAndMarkReady(id: string, urls: string[]) {
+    const updated = await ListingsModel.findByIdAndUpdate(
+      id,
+      {
+        $push: { images: { $each: urls } },
+        $set: { status: "readyToPublish" },
+      },
+      { new: true }
+    );
+    return updated;
+  }
+
+  static async publish(id: string) {
     return ListingsModel.findByIdAndUpdate(
       id,
-      { $push: { images: { $each: images } } },
+      { $set: { status: "published" } },
       { new: true }
     );
   }
 
-  // NEW: Get all listings fully formatted
-  static async getAllListings() {
-    const listings = await ListingsModel.find().lean();
-
-    return listings.map((l: any) => {
-      const banner = l.images?.length ? l.images[0] : null;
-
-      return {
-        _id: l._id,
-        banner,
-        images: l.images || [],
-        expiresAt: l.expiresAt,
-        data: l.data,
-      };
-    });
+  static async expireIfNeeded(id: string) {
+    const doc = await ListingsModel.findById(id);
+    if (!doc) return null;
+    if (doc.uploadLinkExpiresAt && doc.uploadLinkExpiresAt < new Date() && doc.status === "pending") {
+      doc.status = "expired";
+      await doc.save();
+    }
+    return doc;
   }
 
-  // ⭐ NEW: Get one listing formatted (banner + images)
-  static async getSingleListingFormatted(id: string) {
-    const listing = await ListingsModel.findById(id).lean();
+  // Admin view: all
+  static async listAll() {
+    return ListingsModel.find().sort({ createdAt: -1 }).lean();
+  }
 
-    if (!listing) return null;
+  // Public view: only published
+  static async listPublic() {
+    return ListingsModel.find({ status: "published" })
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 
-    const banner = listing.images?.length ? listing.images[0] : null;
-
-    return {
-      _id: listing._id,
-      banner,
-      images: listing.images || [],
-      expiresAt: listing.expiresAt,
-      data: listing.data,
-    };
+  static async remove(id: string) {
+    return ListingsModel.findByIdAndDelete(id);
   }
 }

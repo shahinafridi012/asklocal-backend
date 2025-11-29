@@ -1,34 +1,58 @@
+// src/app/modules/listings/Listings.controller.ts
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import httpStatus from "http-status";
 import { uploadToS3 } from "../../../shared/s3Upload";
-import { ListingsService } from "./GetListingsAgentByZeppier.service";
-import path from "path";
+// @ts-ignore – types for unzipper are optional
 import * as unzipper from "unzipper";
+import path from "path";
+import { ListingsService } from "./GetListingsAgentByZeppier.service";
 
-const FRONTEND_BASE_URL =
-  process.env.FRONTEND_BASE_URL || "http://localhost:3000";
+const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
+// admin Create Listings
+// src/app/modules/listings/Listings.controller.ts  (add this handler)
+export const AdminCreateListing = catchAsync(async (req, res) => {
+  const { data } = req.body; // expects { data: { ...fields } }
+  if (!data) {
+    return sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: "Missing 'data' object",
+      data: null,
+    });
+  }
 
-// 1) Zapier webhook → save listing + create 24h upload URL
+  // Create a 24h upload link window, status=pending
+  const doc = await ListingsService.createFromZapier(data, 24);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Listing created (admin).",
+    data: {
+      listingId: doc._id,
+      status: doc.status,
+      uploadLinkExpiresAt: doc.uploadLinkExpiresAt,
+    },
+  });
+});
+
+// 1) Zapier → create listing + return 24h upload URL
 export const WebhookListings = catchAsync(async (req, res) => {
   const payload = req.body;
-
-  console.log("🔥 New Listing From Zapier:", payload);
-
-  const listing = await ListingsService.saveListing(payload);
-
-  await ListingsService.setExpiry(listing._id, 24); // 24 hours
+  const listing = await ListingsService.createFromZapier(payload, 24);
 
   const uploadUrl = `${FRONTEND_BASE_URL}/upload/${listing._id}`;
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing saved Upload Your images Usings This Url",
+    message: "Listing created. Use the upload URL within 24 hours.",
     data: {
       listingId: listing._id,
+      status: listing.status,
       uploadUrl,
-      expiresIn: "24 hours",
+      uploadLinkExpiresAt: listing.uploadLinkExpiresAt,
     },
   });
 });
@@ -36,129 +60,155 @@ export const WebhookListings = catchAsync(async (req, res) => {
 // 2) Validate upload link
 export const CheckUpload = catchAsync(async (req, res) => {
   const { id } = req.params;
+  let doc = await ListingsService.getById(id);
 
-  const listing = await ListingsService.getListingById(id);
-
-  if (!listing)
+  if (!doc)
     return sendResponse(res, {
       statusCode: httpStatus.NOT_FOUND,
       success: false,
-      message: "Invalid upload link",
-      data: undefined,
+      message: "Invalid upload link.",
+      data: null,
     });
 
-  if (listing.expiresAt && listing.expiresAt < new Date())
+  // Mark as expired if needed
+  doc = await ListingsService.expireIfNeeded(id);
+
+  if (doc!.status === "expired")
     return sendResponse(res, {
       statusCode: httpStatus.GONE,
       success: false,
-      message: "Upload link expired",
-      data: undefined,
+      message: "Upload link expired.",
+      data: null,
     });
 
   return sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Upload link valid",
-    data: listing,
+    message: "Upload link valid.",
+    data: {
+      _id: doc!._id,
+      status: doc!.status,
+      uploadLinkExpiresAt: doc!.uploadLinkExpiresAt,
+    },
   });
 });
 
-// 3) Upload images → S3 → Save URLs
+// 3) Upload images (files or ZIP) → S3 → mark readyToPublish
 export const UploadImages = catchAsync(async (req: any, res) => {
-  const files = req.files;
   const { id } = req.params;
+  const files = req.files;
 
-  if (!files || files.length === 0) {
+  if (!files || !files.length) {
     return sendResponse(res, {
       statusCode: 400,
       success: false,
-      message: "No files uploaded",
-      data: undefined,
+      message: "No files uploaded.",
+      data: null,
     });
   }
 
   const imageUrls: string[] = [];
 
-  // Batch uploader to avoid overload
-  const uploadBatch = async (batch: any[]) => {
-    const results = await Promise.all(
-      batch.map((f) => uploadToS3(f, "listings"))
-    );
-    imageUrls.push(...results);
-  };
+  const pushUrl = (u: string) => imageUrls.push(u);
 
+  // handle each uploaded file
   for (const file of files) {
-    // ZIP case
-    if (
+    const isZip =
       file.mimetype === "application/zip" ||
-      file.mimetype === "application/x-zip-compressed"
-    ) {
-      console.log("📦 ZIP detected → extracting images...");
+      file.mimetype === "application/x-zip-compressed";
 
-      const directory = await unzipper.Open.buffer(file.buffer);
-      const extractedImages: any[] = [];
-
-      for (const entry of directory.files) {
-        const fileName = entry.path.toLowerCase();
-
-        if (
-          fileName.endsWith(".jpg") ||
-          fileName.endsWith(".jpeg") ||
-          fileName.endsWith(".png") ||
-          fileName.endsWith(".webp")
-        ) {
-          const buffer = await entry.buffer();
-          extractedImages.push({
-            buffer,
-            originalname: path.basename(entry.path),
-            mimetype: "image/jpeg",
-          });
-        }
-      }
-
-      console.log("📸 Extracted images from ZIP:", extractedImages.length);
-
-      // Upload ZIP images in batches of 3
-      for (let i = 0; i < extractedImages.length; i += 3) {
-        const batch = extractedImages.slice(i, i + 3);
-        await uploadBatch(batch);
-      }
-    } else {
-      // Normal image upload
+    if (!isZip) {
       const url = await uploadToS3(file, "listings");
-      imageUrls.push(url);
+      pushUrl(url);
+      continue;
+    }
+
+    // ZIP → extract images → upload
+    const directory = await unzipper.Open.buffer(file.buffer);
+    const extracted: any[] = [];
+
+    for (const entry of directory.files) {
+      const name = entry.path.toLowerCase();
+      if (name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")) {
+        const buffer = await entry.buffer();
+        extracted.push({
+          buffer,
+          originalname: path.basename(entry.path),
+          mimetype: "image/jpeg",
+        });
+      }
+    }
+
+    // upload in batches of 3
+    for (let i = 0; i < extracted.length; i += 3) {
+      const batch = extracted.slice(i, i + 3);
+      const urls = await Promise.all(batch.map((f) => uploadToS3(f, "listings")));
+      imageUrls.push(...urls);
     }
   }
 
-  // Save URLs to database
-  await ListingsService.addImages(id, imageUrls);
+  const updated = await ListingsService.addImagesAndMarkReady(id, imageUrls);
 
   return sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: `Uploaded ${imageUrls.length} images successfully!`,
+    message: `Uploaded ${imageUrls.length} image(s). Listing is now readyToPublish.`,
     data: {
       listingId: id,
-      count: imageUrls.length,
-      images: imageUrls,
+      status: updated?.status,
+      images: updated?.images || [],
     },
   });
 });
-export const GetAllListings = catchAsync(async (req, res) => {
-  const listings = await ListingsService.getAllListings();
+
+// 4) Admin: publish
+export const PublishListing = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const updated = await ListingsService.publish(id);
+
+  if (!updated) {
+    return sendResponse(res, {
+      statusCode: 404,
+      success: false,
+      message: "Listing not found.",
+      data: null,
+    });
+  }
 
   return sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "All listings retrieved",
+    message: "Listing published.",
+    data: updated,
+  });
+});
+
+// 5) Admin: list all
+export const GetAllListings = catchAsync(async (_req, res) => {
+  const listings = await ListingsService.listAll();
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "All listings",
     data: listings,
   });
 });
 
+// 6) Public: list published
+export const GetPublicListings = catchAsync(async (_req, res) => {
+  const listings = await ListingsService.listPublic();
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Published listings",
+    data: listings,
+  });
+});
+
+// 7) Single (admin or public resolver as you wish)
 export const GetSingleListing = catchAsync(async (req, res) => {
   const { id } = req.params;
-
-  const listing = await ListingsService.getSingleListingFormatted(id);
+  const listing = await ListingsService.getOneLean(id);
 
   if (!listing) {
     return sendResponse(res, {
@@ -172,7 +222,29 @@ export const GetSingleListing = catchAsync(async (req, res) => {
   return sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Listing retrieved",
+    message: "Listing",
     data: listing,
+  });
+});
+
+// 8) Admin: delete
+export const DeleteListing = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const removed = await ListingsService.remove(id);
+
+  if (!removed) {
+    return sendResponse(res, {
+      statusCode: 404,
+      success: false,
+      message: "Listing not found",
+      data: null,
+    });
+  }
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Listing deleted",
+    data: removed,
   });
 });

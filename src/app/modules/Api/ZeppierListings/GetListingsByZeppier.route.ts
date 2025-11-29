@@ -1,25 +1,29 @@
+// src/app/modules/listings/Listings.routes.ts
 import { Router } from "express";
-import { CheckUpload, GetAllListings, GetSingleListing, UploadImages, WebhookListings } from "./GetListingsByZeppier.controller";
-import { upload } from "../../../middlewares/multer";
 
+import { upload } from "../../../middlewares/multer"; // memoryStorage
+import { AdminCreateListing, CheckUpload, DeleteListing, GetAllListings, GetPublicListings, GetSingleListing, PublishListing, UploadImages, WebhookListings } from "./GetListingsByZeppier.controller";
 
 const router = Router();
-
-// Zapier → Send property details
+router.post("/admin", AdminCreateListing);   
+// Zapier → send property
 router.post("/webhook", WebhookListings);
 
-// Frontend → Validate link
+// Validate upload link
 router.get("/upload/:id", CheckUpload);
 
-// Frontend → Upload images
-router.post(
-  "/upload/:id/images",
-  upload.array("images"),
-  UploadImages
-);
+// Upload images (images[] or a .zip)
+router.post("/upload/:id/images", upload.array("images"), UploadImages);
 
+// Admin
 router.get("/all", GetAllListings);
-router.get("/:id", GetSingleListing);
+router.put("/:id/publish", PublishListing);
+router.delete("/:id", DeleteListing);
 
+// Public
+router.get("/public", GetPublicListings);
+
+// Single
+router.get("/:id", GetSingleListing);
 
 export const ListingsRoutes = router;

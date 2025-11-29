@@ -13,7 +13,7 @@ export class ErrorLogService {
         process.env.ADMIN_EMAIL!,
         `🔥 Error Logged (${payload.source})`,
         `
-          <h2>🔥 Error Report (${payload.source})</h2>
+          <h2> Error Report (${payload.source})</h2>
           <p><strong>Message:</strong> ${payload.message}</p>
           ${
             payload.route
