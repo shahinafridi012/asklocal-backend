@@ -3,6 +3,7 @@ import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { PartnerFlowService } from "./asklocalPartner.service";
 import { MoxoAgentFlowService } from "../Services/moxo.BecomeAsklocalPartnerFlow";
+import { NotificationModel } from "../../Main-Site/notification/notification.model";
 
 export class PartnerFlowController {
 
@@ -10,6 +11,13 @@ export class PartnerFlowController {
   static createUser = catchAsync(async (req, res) => {
     const { firstName, lastName, mlsLicense, email } = req.body;
 
+
+ await NotificationModel.create({
+    title: "New Asklocal Partner Flow User",
+    message: `${firstName} ${lastName} has been asklocal Partner Flow Access.`,
+    type: "asklocalPartner",
+    createdBy: email,
+  });
     const user = await PartnerFlowService.createUser({
       firstName,
       lastName,

@@ -3,6 +3,7 @@ import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { ListingAgentConnectService } from "./agentListingConnect.service";
 import { MoxoListingAgentFlowService } from "../Services/moxo.ListingAgentConnectFlow.service";
+import { NotificationModel } from "../../Main-Site/notification/notification.model";
 
 export class ListingAgentConnectController {
   // CREATE USER + SEND OTP
@@ -16,7 +17,12 @@ export class ListingAgentConnectController {
       firstName,
       lastName,
     });
-
+ await NotificationModel.create({
+    title: "Agent Listing Connect",
+    message: `${firstName} ${lastName} has been Connected by Agent ${agentEmail}`,
+    type: "AgentListingConnect",
+    createdBy: userEmail,
+  });
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
       success: true,

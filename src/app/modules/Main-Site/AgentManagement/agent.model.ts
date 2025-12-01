@@ -31,8 +31,8 @@ const AgentSchema = new Schema<AgentDoc, AgentModel>(
     category: { type: String, default: "Real Estate", trim: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     descriptionHtml: { type: String, default: "" },
-    agentPhoto: { type: String, default: "" },        // ✅ renamed
-    businessPhoto: { type: String, default: "" },     // ✅ renamed
+    agentPhoto: { type: String, default: "" },        // 
+    businessPhoto: { type: String, default: "" },     // 
     locations: { type: [String], default: [] },
     hours: { type: OfficeHoursSchema, default: undefined },
     createdBy: { type: String },

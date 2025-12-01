@@ -4,6 +4,7 @@ import { UserFlowService } from "./UserFlow.service";
 import catchAsync from "../../../utils/catchAsync";
 import sendResponse from "../../../utils/sendResponse";
 import { MoxoService } from "../Services/moxo.UserFlowServices";
+import { NotificationModel } from "../../Main-Site/notification/notification.model";
 
 export class UserFlowController {
   // CREATE USER (super fast)
@@ -16,7 +17,12 @@ export class UserFlowController {
       lastName,
       email,
     });
-
+    await NotificationModel.create({
+      title: "New Concierge Flow Access",
+      message: `${firstName} ${lastName} Just Accessed the Concierge Flow`,
+      type: "user",
+      createdBy: email,
+    });
     // ⭐ Respond instantly
     sendResponse(res, {
       statusCode: httpStatus.CREATED,
@@ -26,7 +32,7 @@ export class UserFlowController {
     });
 
     // ⭐ Send OTP email in background
-    UserFlowService.sendVerificationCode(email, firstName).catch(err =>
+    UserFlowService.sendVerificationCode(email, firstName).catch((err) =>
       console.error("Email Error:", err)
     );
   });
@@ -70,8 +76,8 @@ export class UserFlowController {
 
     // Run Moxo flow in background
     if (flowType) {
-      MoxoService.startFlow({ firstName, lastName, email, flowType }).catch(err =>
-        console.error("Moxo Error:", err)
+      MoxoService.startFlow({ firstName, lastName, email, flowType }).catch(
+        (err) => console.error("Moxo Error:", err)
       );
     }
   });
@@ -86,7 +92,7 @@ export class UserFlowController {
         statusCode: httpStatus.NOT_FOUND,
         success: false,
         message: "User not found",
-        data: undefined
+        data: undefined,
       });
     }
 
@@ -94,10 +100,10 @@ export class UserFlowController {
       statusCode: httpStatus.OK,
       success: true,
       message: "New verification code sent",
-      data: undefined
+      data: undefined,
     });
 
-    UserFlowService.sendVerificationCode(email, user.firstName).catch(err =>
+    UserFlowService.sendVerificationCode(email, user.firstName).catch((err) =>
       console.error("Email Error:", err)
     );
   });

@@ -11,6 +11,9 @@ import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.r
 import { AgentsRoute } from "../modules/Main-Site/AgentManagement/agent.route";
 import { PagesRoute } from "../modules/Main-Site/HowToHub/Pages/page.route";
 import { MetricsRoutes } from "../modules/Main-Site/metrics/metrics.route";
+import {  HomepageTestimonialRoutes } from "../modules/Main-Site/Testimonials/homepageTestimonial.route";
+import { AdminRoutes } from "../modules/Main-Site/admin/admin.route";
+import { AuthRoutes } from "../modules/Main-Site/auth/auth.route";
 
 const router = Router();
 
@@ -58,6 +61,17 @@ const moduleRoutes = [
   {
     path: "/metrics", // FIXED
     route: MetricsRoutes,
+  },
+  {
+    path: "/testimonial", // FIXED
+    route: HomepageTestimonialRoutes,
+  },
+   {
+    path: "/admin", // FIXED
+    route: AdminRoutes,
+  }, {
+    path: "/auth", // FIXED
+    route: AuthRoutes,
   },
 ];
 

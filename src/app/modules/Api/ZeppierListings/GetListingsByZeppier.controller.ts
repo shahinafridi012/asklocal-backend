@@ -7,12 +7,14 @@ import { uploadToS3 } from "../../../shared/s3Upload";
 import * as unzipper from "unzipper";
 import path from "path";
 import { ListingsService } from "./GetListingsAgentByZeppier.service";
+import { NotificationModel } from "../../Main-Site/notification/notification.model";
 
 const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
 // admin Create Listings
 // src/app/modules/listings/Listings.controller.ts  (add this handler)
 export const AdminCreateListing = catchAsync(async (req, res) => {
   const { data } = req.body; // expects { data: { ...fields } }
+ 
   if (!data) {
     return sendResponse(res, {
       statusCode: 400,
@@ -21,7 +23,11 @@ export const AdminCreateListing = catchAsync(async (req, res) => {
       data: null,
     });
   }
-
+  await NotificationModel.create({
+    message: `New listing created via Zapier.`,
+    title: "New Listing Created",
+    type: "ZeppierListing",
+  });
   // Create a 24h upload link window, status=pending
   const doc = await ListingsService.createFromZapier(data, 24);
 

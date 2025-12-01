@@ -6,11 +6,12 @@ import {
   uploadSettingsImage,
 } from "./generalsettings.controller";
 import { upload } from "../../../middlewares/multer";
+import { verifyToken } from "../../../middlewares/auth.middleware";
 
 const router = express.Router();
 
-router.get("/", getSettings);
-router.post("/", updateSettings);
-router.post("/upload", upload.single("file"), uploadSettingsImage);
+router.get("/", verifyToken, getSettings);
+router.post("/", verifyToken, updateSettings);
+router.post("/upload", verifyToken, upload.single("file"), uploadSettingsImage);
 
 export const GeneralSettingsRoute = router;
