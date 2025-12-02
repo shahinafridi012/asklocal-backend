@@ -3,16 +3,15 @@ import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import { AuthService } from "./auth.service";
 import { NotificationModel } from "../notification/notification.model";
-
 const cookieOpts: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as
-    | "none"
-    | "lax"
-    | "strict",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: process.env.NODE_ENV === "production", // HTTPS 
+  
+  sameSite: "lax", // proxy system best practice 
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: "/",    // acessible on all routes
 };
+
 
 
 export const login = async (req: Request, res: Response) => {
@@ -39,13 +38,15 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (_req: Request, res: Response) => {
   res
-    .clearCookie("admin_token", {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
-    })
-    .status(httpStatus.OK)
-    .json({ success: true, message: "Logged out" });
+  res.clearCookie("admin_token", {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+})
+.status(httpStatus.OK)
+.json({ success: true, message: "Logged out" });
+
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {
