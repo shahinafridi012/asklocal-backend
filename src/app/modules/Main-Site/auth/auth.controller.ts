@@ -3,13 +3,13 @@ import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import { AuthService } from "./auth.service";
 import { NotificationModel } from "../notification/notification.model";
+
 const cookieOpts: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // HTTPS 
-  
-  sameSite: "lax", // proxy system best practice 
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: "/",    // acessible on all routes
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "none",     // 🔥 Safari-friendly for proxy + HTTPS
+  path: "/",            // 🔥 cookie সব রুটে অ্যাক্সেসযোগ্য
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 
