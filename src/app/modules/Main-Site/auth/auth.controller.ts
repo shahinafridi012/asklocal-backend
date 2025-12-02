@@ -6,10 +6,10 @@ import { NotificationModel } from "../notification/notification.model";
 
 const cookieOpts: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "none",     // 🔥 Safari-friendly for proxy + HTTPS
-  path: "/",            // 🔥 cookie সব রুটে অ্যাক্সেসযোগ্য
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: process.env.NODE_ENV === "production", // must be true on Render
+  sameSite: "none", // ✅ required for cross-domain cookies
+  path: "/",        // ✅ cookie usable everywhere
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
 
@@ -18,35 +18,41 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const { admin } = await AuthService.login(email, password);
 
-    await NotificationModel.create({
-    title: "Admin Login",
-    message: `${email} has logged in as admin.`,
-    // type: "adminLogin",
-    createdBy: email,
-  });
-
   const token = jwt.sign(
-    { id: admin._id.toString(), email: admin.email, role: admin.role },
+    { id: admin._id, email: admin.email, role: admin.role },
     process.env.JWT_SECRET as string,
     { expiresIn: "7d" }
   );
+
+  await NotificationModel.create({
+    title: "Admin Login",
+    message: `${email} logged in as admin.`,
+    createdBy: email,
+  });
+
   res
-    .cookie("admin_token", token, cookieOpts)
+    .cookie("admin_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    })
+    .setHeader("Access-Control-Allow-Credentials", "true")
     .status(httpStatus.OK)
     .json({ success: true, message: "Login successful", data: { admin } });
 };
 
 export const logout = async (_req: Request, res: Response) => {
   res
-  res.clearCookie("admin_token", {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  path: "/",
-})
-.status(httpStatus.OK)
-.json({ success: true, message: "Logged out" });
-
+    .clearCookie("admin_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      path: "/",
+    })
+    .status(httpStatus.OK)
+    .json({ success: true, message: "Logged out successfully" });
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {

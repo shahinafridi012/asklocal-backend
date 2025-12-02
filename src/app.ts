@@ -28,8 +28,11 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: true,          // all orgins in allowedOrigins are allowed safe for proxy
-    credentials: true,     // cookie allow
+    origin: [
+      "https://asklocal-next-admin-frontend.vercel.app",
+      "https://asklocal-client-frontend.vercel.app",
+    ],
+    credentials: true,
   })
 );
 
