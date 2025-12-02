@@ -9,14 +9,12 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const cookieOpts: CookieOptions = {
   httpOnly: true,
-  secure: isProduction, // only HTTPS in prod
-  sameSite: isProduction ? "none" : "lax", // cross-domain in prod, safe local in dev
-  path: "/", // must match for login/logout
-  domain: isProduction ? ".vercel.app" : undefined, // ⛔ do not set on localhost
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  secure: isProduction, // true on render/vercel (HTTPS)
+  sameSite: isProduction ? "none" : "lax",
+  path: "/", // global
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
-// ✅ LOGIN
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const { admin } = await AuthService.login(email, password);
@@ -36,17 +34,17 @@ export const login = async (req: Request, res: Response) => {
   res
     .cookie("admin_token", token, cookieOpts)
     .status(httpStatus.OK)
-    .json({ success: true, message: "Login successful", data: { admin } });
+    .json({
+      success: true,
+      message: "Login successful",
+      data: { admin },
+    });
 };
 
 // ✅ LOGOUT
 export const logout = async (_req: Request, res: Response) => {
-  // must match cookie settings
   res
-    .clearCookie("admin_token", {
-      ...cookieOpts,
-      maxAge: undefined, // important for clearing
-    })
+    .clearCookie("admin_token", { ...cookieOpts, maxAge: undefined })
     .status(httpStatus.OK)
     .json({ success: true, message: "Logged out successfully" });
 };
