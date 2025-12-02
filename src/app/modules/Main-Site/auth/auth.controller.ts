@@ -4,16 +4,19 @@ import jwt from "jsonwebtoken";
 import { AuthService } from "./auth.service";
 import { NotificationModel } from "../notification/notification.model";
 
-const cookieOpts = {
+// ✅ dynamic cookie options for local + production
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOpts: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "none" as const,   // ✅ cross-domain support
-  path: "/",                   // ✅ works everywhere
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  secure: isProduction, // only HTTPS in prod
+  sameSite: isProduction ? "none" : "lax", // cross-domain in prod, safe local in dev
+  path: "/", // must match for login/logout
+  domain: isProduction ? ".vercel.app" : undefined, // ⛔ do not set on localhost
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
-
-// login controller: sets cookie and returns admin data
+// ✅ LOGIN
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const { admin } = await AuthService.login(email, password);
@@ -36,19 +39,19 @@ export const login = async (req: Request, res: Response) => {
     .json({ success: true, message: "Login successful", data: { admin } });
 };
 
-// logout controller: clears cookie
+// ✅ LOGOUT
 export const logout = async (_req: Request, res: Response) => {
+  // must match cookie settings
   res
     .clearCookie("admin_token", {
       ...cookieOpts,
-      maxAge: undefined,
+      maxAge: undefined, // important for clearing
     })
     .status(httpStatus.OK)
     .json({ success: true, message: "Logged out successfully" });
 };
 
-
-
+// ✅ FORGOT PASSWORD
 export const forgotPassword = async (req: Request, res: Response) => {
   await AuthService.forgotPassword(req.body.email);
   res
@@ -56,13 +59,18 @@ export const forgotPassword = async (req: Request, res: Response) => {
     .json({ success: true, message: "Verification code sent" });
 };
 
+// ✅ VERIFY RESET CODE
 export const verifyResetCode = async (req: Request, res: Response) => {
-  const result = await AuthService.verifyResetCode(req.body.email, req.body.code);
+  const result = await AuthService.verifyResetCode(
+    req.body.email,
+    req.body.code
+  );
   res
     .status(httpStatus.OK)
     .json({ success: true, message: "Code verified", data: result });
 };
 
+// ✅ RESET PASSWORD
 export const resetPassword = async (req: Request, res: Response) => {
   await AuthService.resetPassword(req.body.token, req.body.password);
   res
@@ -70,7 +78,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     .json({ success: true, message: "Password reset successful" });
 };
 
-// get current admin
+// ✅ GET CURRENT ADMIN
 export const me = async (req: Request, res: Response) => {
   const user = await AuthService.me(req.user!.id);
   res.status(httpStatus.OK).json({ success: true, data: user });

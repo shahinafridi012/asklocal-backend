@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Auth
 router.post("/login", login);                     // sets cookie
-router.post("/logout", logout);                   // clears cookie
+router.post("/logout", verifyToken, logout);                   // clears cookie
 router.get("/me", verifyToken, me);               // returns current admin
 
 // Forgot Password
