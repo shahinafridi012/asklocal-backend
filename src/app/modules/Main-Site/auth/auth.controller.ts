@@ -1,15 +1,19 @@
-import { Request, Response } from "express";
+import { CookieOptions, Request, Response } from "express";
 import httpStatus from "http-status";
 import jwt from "jsonwebtoken";
 import { AuthService } from "./auth.service";
 import { NotificationModel } from "../notification/notification.model";
 
-const cookieOpts = {
+const cookieOpts: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as
+    | "none"
+    | "lax"
+    | "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
+
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
