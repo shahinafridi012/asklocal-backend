@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 export interface JWTPayload {
   id: string;
   email: string;
-  role: "Admin" | "Manager" | "Editor";
+  role: string;
 }
 
 declare global {
@@ -24,7 +24,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     req.user = decoded;
     next();
   } catch {
-    return res.status(401).json({ success: false, message: "Invalid token" });
+    res.status(401).json({ success: false, message: "Invalid token" });
   }
 };
 
