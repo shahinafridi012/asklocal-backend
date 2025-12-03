@@ -10,7 +10,7 @@ const baseCookie: CookieOptions = {
   secure: isProduction,            // HTTPS required in production
   sameSite: isProduction ? "none" : "lax", // none for cross-site
   path: "/",
-  domain: isProduction ? ".vercel.app" : undefined, // allow across subdomains
+  // domain: isProduction ? ".vercel.app" : undefined, // allow across subdomains
 };
 
 export const login = async (req: Request, res: Response) => {
