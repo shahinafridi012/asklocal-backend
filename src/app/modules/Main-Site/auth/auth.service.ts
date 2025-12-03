@@ -10,7 +10,6 @@ export const AuthService = {
     const ok = await bcrypt.compare(password, admin.password);
     if (!ok) throw new Error("Invalid password");
 
-    // ✳️ টোকেন
     const accessToken = jwt.sign(
       { id: admin._id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET!,
@@ -23,7 +22,6 @@ export const AuthService = {
       { expiresIn: "14d" }
     );
 
-    // চাইলে DB তে refreshToken রাখবেন
     admin.refreshToken = refreshToken;
     admin.resetTokenExpiry = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
     await admin.save();
