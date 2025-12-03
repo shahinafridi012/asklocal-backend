@@ -16,4 +16,5 @@ export interface IAdmin {
   verificationCodeExpiry?: Date | null;
   resetToken?: string | null;
   resetTokenExpiry?: Date | null;
+  refreshToken?: string | null;
 }

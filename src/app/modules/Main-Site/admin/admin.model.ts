@@ -21,6 +21,7 @@ const AdminSchema = new Schema<IAdmin>(
     verificationCode: { type: String, default: null },
     verificationCodeExpiry: { type: Date, default: null },
     resetToken: { type: String, default: null },
+    refreshToken: { type: String, default: null },
     resetTokenExpiry: { type: Date, default: null },
   },
   { timestamps: true }
