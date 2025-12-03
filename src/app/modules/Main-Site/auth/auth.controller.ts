@@ -1,34 +1,14 @@
-import { Request, Response, CookieOptions } from "express";
+import { Request, Response } from "express";
 import httpStatus from "http-status";
 import { AuthService } from "./auth.service";
 
-const isProduction = process.env.NODE_ENV === "production";
-
-// ✅ Cookie setup (safe for Render ↔ Vercel)
-const baseCookie: CookieOptions = {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
-  path: "/", // no domain — let browser attach automatically to backend domain
-};
-
 // ==========================================================
-// ✅ LOGIN CONTROLLER
+// ✅ LOGIN CONTROLLER — Return tokens in JSON
 // ==========================================================
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const { admin, accessToken, refreshToken } = await AuthService.login(email, password);
-
-    // Clear old cookies first
-    res.clearCookie("admin_token", baseCookie);
-    res.clearCookie("refresh_token", baseCookie);
-
-    // Set new cookies (Render will serve under its own domain)
-    res.cookie("admin_token", accessToken, { ...baseCookie, maxAge: 7 * 24 * 60 * 60 * 1000 });
-    res.cookie("refresh_token", refreshToken, { ...baseCookie, maxAge: 14 * 24 * 60 * 60 * 1000 });
-
-    res.setHeader("Access-Control-Allow-Credentials", "true");
 
     console.log(`✅ Admin login successful: ${admin.email} (${admin.role})`);
 
@@ -42,6 +22,8 @@ export const login = async (req: Request, res: Response) => {
         lastName: admin.lastName,
         role: admin.role,
       },
+      accessToken,
+      refreshToken,
     });
   } catch (err: any) {
     console.error("❌ Login failed:", err.message);
@@ -50,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // ==========================================================
-// ✅ ME CONTROLLER
+// ✅ ME CONTROLLER — Protected by Bearer token
 // ==========================================================
 export const me = async (req: Request, res: Response) => {
   try {
@@ -65,8 +47,5 @@ export const me = async (req: Request, res: Response) => {
 // ✅ LOGOUT CONTROLLER
 // ==========================================================
 export const logout = async (_req: Request, res: Response) => {
-  res.clearCookie("admin_token", baseCookie);
-  res.clearCookie("refresh_token", baseCookie);
-  res.setHeader("Access-Control-Allow-Credentials", "true");
   return res.status(httpStatus.OK).json({ success: true, message: "Logged out" });
 };
