@@ -11,7 +11,7 @@ const baseCookie: CookieOptions = {
   secure: true,             // must be true in Render (HTTPS)
   sameSite: "none",         // must be 'none' for cross-domain
   path: "/",                // apply cookie to all routes
-  // ❌ never set domain manually — Safari will reject it
+ domain: isProduction ? "asklocal-next-admin-frontend.vercel.app" : "localhost", //  no protocol here
 };
 
 // ==========================================================
