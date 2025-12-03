@@ -7,10 +7,8 @@ export class McSoapUserService {
   static async createUser(data: AsklocalMcSoapUserData) {
     await connectDB();
 
-    // 1) Save user FAST
     const user = await McSoapUser.create(data);
 
-    // 2) Background SOAP call
     sendMortgageCoachSOAP(
       data.firstName,
       data.lastName,
@@ -18,24 +16,30 @@ export class McSoapUserService {
       data.amount,
       data.zipCode
     )
-      .then(() => {
-        console.log("⚡ SOAP request sent in background");
-      })
-      .catch((err) => {
-        console.error("❌ SOAP request error:", err);
-      });
+      .then(() => console.log("⚡ SOAP request sent in background"))
+      .catch((err) => console.error("❌ SOAP request error:", err));
 
-    // 3) Return response immediately (FAST)
     return user;
   }
 
   static async getUserByEmail(email: string) {
     await connectDB();
-    return await McSoapUser.findOne({ email });
+    return McSoapUser.findOne({ email });
   }
 
   static async getAllUsers() {
     await connectDB();
-    return await McSoapUser.find().sort({ createdAt: -1 });
+    return McSoapUser.find().sort({ createdAt: -1 });
+  }
+
+  // 🔹 Delete user by ID
+  static async deleteUser(id: string) {
+    await connectDB();
+    return McSoapUser.findByIdAndDelete(id);
+  }
+    static async clearAllUsers() {
+    await connectDB();
+    await McSoapUser.deleteMany({});
+    return true;
   }
 }

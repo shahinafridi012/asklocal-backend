@@ -3,6 +3,7 @@ import { IErrorLog } from "./SentryError.interface";
 import { ErrorLog } from "./SentryError.model";
 
 export class ErrorLogService {
+  static countAll: any;
   // 🔹 Create Log
   static async createErrorLog(payload: IErrorLog) {
     const log = await ErrorLog.create(payload);

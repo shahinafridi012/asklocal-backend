@@ -33,7 +33,6 @@ AdminSchema.pre("save", async function (next) {
   next();
 });
 
-
 // ✅ Hash password before saving
 // AdminSchema.pre("save", async function (next) {
 //   if (!this.isModified("password")) return next();

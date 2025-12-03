@@ -14,6 +14,7 @@ import { MetricsRoutes } from "../modules/Main-Site/metrics/metrics.route";
 import {  HomepageTestimonialRoutes } from "../modules/Main-Site/Testimonials/homepageTestimonial.route";
 import { AdminRoutes } from "../modules/Main-Site/admin/admin.route";
 import { AuthRoutes } from "../modules/Main-Site/auth/auth.route";
+import { DashboardRoute } from "../modules/Dashboard/dashboard/dashboard.route";
 
 const router = Router();
 
@@ -69,9 +70,10 @@ const moduleRoutes = [
    {
     path: "/admin", // FIXED
     route: AdminRoutes,
-  }, {
-    path: "/auth", // FIXED
-    route: AuthRoutes,
+  }, 
+   {
+    path: "/", // FIXED
+    route: DashboardRoute,
   },
 ];
 
