@@ -8,13 +8,15 @@ import * as unzipper from "unzipper";
 import path from "path";
 import { ListingsService } from "./GetListingsAgentByZeppier.service";
 import { NotificationModel } from "../../Main-Site/notification/notification.model";
+import { Cache } from "../../../shared/redis";
 
-const FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
+const FRONTEND_BASE_URL =
+  process.env.FRONTEND_BASE_URL || "http://localhost:3000";
 // admin Create Listings
 // src/app/modules/listings/Listings.controller.ts  (add this handler)
 export const AdminCreateListing = catchAsync(async (req, res) => {
   const { data } = req.body; // expects { data: { ...fields } }
- 
+
   if (!data) {
     return sendResponse(res, {
       statusCode: 400,
@@ -135,7 +137,12 @@ export const UploadImages = catchAsync(async (req: any, res) => {
 
     for (const entry of directory.files) {
       const name = entry.path.toLowerCase();
-      if (name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp")) {
+      if (
+        name.endsWith(".jpg") ||
+        name.endsWith(".jpeg") ||
+        name.endsWith(".png") ||
+        name.endsWith(".webp")
+      ) {
         const buffer = await entry.buffer();
         extracted.push({
           buffer,
@@ -148,7 +155,9 @@ export const UploadImages = catchAsync(async (req: any, res) => {
     // upload in batches of 3
     for (let i = 0; i < extracted.length; i += 3) {
       const batch = extracted.slice(i, i + 3);
-      const urls = await Promise.all(batch.map((f) => uploadToS3(f, "listings")));
+      const urls = await Promise.all(
+        batch.map((f) => uploadToS3(f, "listings"))
+      );
       imageUrls.push(...urls);
     }
   }
@@ -214,24 +223,50 @@ export const GetPublicListings = catchAsync(async (_req, res) => {
 // 7) Single (admin or public resolver as you wish)
 export const GetSingleListing = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const listing = await ListingsService.getOneLean(id);
+  const cacheKey = `listing:${id}`;
 
+  const cached = await Cache.get(cacheKey);
+  if (cached) {
+    // ✅ Parse images if they got stringified
+    if (typeof cached.images === "string") {
+      try {
+        cached.images = JSON.parse(cached.images);
+      } catch {
+        cached.images = [];
+      }
+    }
+
+    res.set("X-Cache", "HIT");
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Listing loaded from Redis cache",
+      data: cached,
+    });
+  }
+
+  // ✅ Fallback → Mongo
+  const listing = await ListingsService.getOneLean(id);
   if (!listing) {
     return sendResponse(res, {
-      statusCode: 404,
+      statusCode: httpStatus.NOT_FOUND,
       success: false,
       message: "Listing not found",
       data: null,
     });
   }
 
+  // ✅ Save to cache for 24h
+  await Cache.set(cacheKey, listing, 86400);
+
   return sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
-    message: "Listing",
+    message: "Listing loaded from MongoDB",
     data: listing,
   });
 });
+
 
 // 8) Admin: delete
 export const DeleteListing = catchAsync(async (req, res) => {
@@ -255,7 +290,7 @@ export const DeleteListing = catchAsync(async (req, res) => {
   });
 });
 
-// 9 
+// 9
 export const UpdateListing = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { data, status } = req.body;
