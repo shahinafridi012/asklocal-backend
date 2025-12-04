@@ -5,7 +5,7 @@ const NotificationSchema = new Schema(
   {
     title: { type: String, required: true },
     message: { type: String, required: true },
-    type: { type: String, enum: ["admin", "user", "system"], default: "system" },
+    type: { type: String, enum: ["admin", "user", "system", "listing-create", 'agent-create'], default: "system" },
     createdBy: { type: String, default: "System" },
     read: { type: Boolean, default: false },
   },

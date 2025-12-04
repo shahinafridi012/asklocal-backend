@@ -9,6 +9,7 @@ import * as Tracing from "@sentry/tracing";
 import { ErrorLogService } from "./app/modules/Main-Site/SentryError/SentryError.service";
 import { AuthRoutes } from "./app/modules/Main-Site/auth/auth.route";
 import { NotificationRoutes } from "./app/modules/Main-Site/notification/notification.route";
+import { TestRoutes } from "./app/modules/test/test.route";
 
 dotenv.config();
 const app: Application = express();
@@ -65,6 +66,7 @@ app.use("/api/v1/auth", AuthRoutes)
 app.use("/api/v1", router);
 app.use("/api/v1/notifications", NotificationRoutes);
 
+app.use("/api/v1/test", TestRoutes);
 
 // Test Route
 app.get("/", (req: Request, res: Response) => {

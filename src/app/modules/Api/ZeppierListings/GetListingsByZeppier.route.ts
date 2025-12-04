@@ -15,12 +15,13 @@ import {
   UploadImages,
   WebhookListings,
 } from "./GetListingsByZeppier.controller";
+import { verifyToken } from "../../../middlewares/auth.middleware";
 
 
 const router = Router();
 
 // Admin → Create Listing
-router.post("/admin", AdminCreateListing);
+router.post("/admin", verifyToken, AdminCreateListing);
 
 // Zapier → Create via webhook
 router.post("/webhook", WebhookListings);
@@ -32,16 +33,16 @@ router.get("/upload/:id", CheckUpload);
 router.post("/upload/:id/images", upload.array("images"), UploadImages);
 
 // ✅ Admin → Update Listing
-router.put("/:id", UpdateListing);
+router.put("/:id", verifyToken, UpdateListing);
 
 // ✅ Admin → Delete specific image
-router.delete("/:id/images/:index", DeleteListingImage);
+router.delete("/:id/images/:index", verifyToken, DeleteListingImage);
 
 // Admin → Publish Listing
-router.put("/:id/publish", PublishListing);
+router.put("/:id/publish", verifyToken, PublishListing);
 
 // Admin → Delete Listing
-router.delete("/:id", DeleteListing);
+router.delete("/:id",verifyToken, DeleteListing);
 
 // Admin → All Listings
 router.get("/all", GetAllListings);

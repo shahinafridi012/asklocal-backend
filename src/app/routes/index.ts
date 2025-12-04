@@ -15,6 +15,7 @@ import {  HomepageTestimonialRoutes } from "../modules/Main-Site/Testimonials/ho
 import { AdminRoutes } from "../modules/Main-Site/admin/admin.route";
 import { AuthRoutes } from "../modules/Main-Site/auth/auth.route";
 import { DashboardRoute } from "../modules/Dashboard/dashboard/dashboard.route";
+import { LoadfastListingRoutes } from "../modules/Main-Site/LoadfastListing/LoadfastListing.routes";
 
 const router = Router();
 
@@ -74,6 +75,10 @@ const moduleRoutes = [
    {
     path: "/", // FIXED
     route: DashboardRoute,
+  },
+   {
+    path: "/loadfastlistings", // FIXED
+    route: LoadfastListingRoutes,
   },
 ];
 

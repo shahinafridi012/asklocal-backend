@@ -24,9 +24,9 @@ export const AdminCreateListing = catchAsync(async (req, res) => {
     });
   }
   await NotificationModel.create({
-    message: `New listing created via Zapier.`,
+    message: `New listing created By Admin.`,
     title: "New Listing Created",
-    type: "ZeppierListing",
+    type: "listing-create",
   });
   // Create a 24h upload link window, status=pending
   const doc = await ListingsService.createFromZapier(data, 24);
