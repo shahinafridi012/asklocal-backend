@@ -20,6 +20,27 @@ const OfficeHoursSchema = new Schema<Record<string, DayHours>>(
   { _id: false }
 );
 
+// ✅ Review Subschema (with uploader info)
+const ReviewSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    image: { type: String, default: "" }, // user-uploaded or S3 image
+    rating: { type: Number, min: 1, max: 5, required: true },
+    comment: { type: String, default: "" },
+    addedBy: { type: String, enum: ["user", "admin"], default: "user" },
+  },
+  { timestamps: true }
+);
+
+const SocialLinksSchema = new Schema(
+  {
+    twitter: { type: String, default: "" },
+    facebook: { type: String, default: "" },
+    website: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
 const AgentSchema = new Schema<AgentDoc, AgentModel>(
   {
     first: { type: String, required: true, trim: true },
@@ -31,10 +52,25 @@ const AgentSchema = new Schema<AgentDoc, AgentModel>(
     category: { type: String, default: "Real Estate", trim: true },
     status: { type: String, enum: ["active", "inactive"], default: "active" },
     descriptionHtml: { type: String, default: "" },
-    agentPhoto: { type: String, default: "" },        // 
-    businessPhoto: { type: String, default: "" },     // 
+
+    // Photos
+    agentPhoto: { type: String, default: "" },
+    businessPhoto: { type: String, default: "" },
     locations: { type: [String], default: [] },
     hours: { type: OfficeHoursSchema, default: undefined },
+
+    // Extra Info
+    foundedYear: { type: Number, default: new Date().getFullYear() },
+    experienceYears: { type: Number, default: 1 },
+    happyCustomers: { type: Number, default: 0 },
+    services: { type: [String], default: [] },
+
+    // ✅ Reviews array
+    reviews: { type: [ReviewSchema], default: [] },
+
+    // ✅ Social Links
+    socialLinks: { type: SocialLinksSchema, default: {} },
+
     createdBy: { type: String },
     updatedBy: { type: String },
   },
