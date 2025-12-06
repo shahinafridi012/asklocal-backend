@@ -25,13 +25,11 @@ export class MoxoAgentFlowService {
         workspace_name: `Agent-${firstName}${lastName}-AskLocal`,
         workspace_owner: process.env.MOXO_WORKSPACE_OWNER_EMAIL!, // ONLY OWNER
         workspace_description: `New Agent Onboarding - MLS License: ${mlsLicense}`,
-
         welcome_message: `Welcome ${firstName}, your onboarding workspace is ready!`,
 
         // ONLY TWO ROLES:
         // 1. Workspace Owner → manages everything
         // 2. Agent → the real estate agent joining AskLocal
-
         // Agent (user from form)
         "role.Agent.email": process.env.MOXO_AGENT_EMAIL!,
         "role.Client.email": email,

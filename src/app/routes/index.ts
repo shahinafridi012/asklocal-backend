@@ -16,6 +16,7 @@ import { AdminRoutes } from "../modules/Main-Site/admin/admin.route";
 import { AuthRoutes } from "../modules/Main-Site/auth/auth.route";
 import { DashboardRoute } from "../modules/Dashboard/dashboard/dashboard.route";
 import { LoadfastListingRoutes } from "../modules/Main-Site/LoadfastListing/LoadfastListing.routes";
+import { StorefrontAgentConnectRoutes } from "../modules/Api/StoreFrontAgentConcisergeFlow/storefrontAgentConnect.routes";
 
 const router = Router();
 
@@ -79,6 +80,10 @@ const moduleRoutes = [
    {
     path: "/loadfastlistings", // FIXED
     route: LoadfastListingRoutes,
+  },
+   {
+    path: "/storefront-agent-connect", // FIXED
+    route: StorefrontAgentConnectRoutes,
   },
 ];
 

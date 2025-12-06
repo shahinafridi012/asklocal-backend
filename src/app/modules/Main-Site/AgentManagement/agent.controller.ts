@@ -192,7 +192,7 @@ export const AgentController = {
     }
   },
 
-  // ✅ Edit Review
+  // Edit Review
   editReview: async (req: Request, res: Response) => {
     try {
       const { name, image, rating, comment } = req.body;
@@ -214,7 +214,7 @@ export const AgentController = {
     }
   },
 
-  // ✅ Delete One Review
+  //  Delete One Review
   deleteReview: async (req: Request, res: Response) => {
     try {
       const data = await AgentService.deleteReview(
@@ -229,7 +229,7 @@ export const AgentController = {
     }
   },
 
-  // ✅ Delete All Reviews
+  // Delete All Reviews
   clearReviews: async (req: Request, res: Response) => {
     try {
       const data = await AgentService.clearReviews(req.params.id);
