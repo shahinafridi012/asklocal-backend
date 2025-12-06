@@ -90,7 +90,7 @@ export const AgentController = {
     }
   },
 
-  // ✅ Get Agent by slug
+  // Get Agent by slug
   getBySlug: async (req: Request, res: Response) => {
     try {
       const slug = req.params.slug.toLowerCase();
@@ -153,7 +153,7 @@ export const AgentController = {
       return res.status(500).json({ success: false, message: e.message });
     }
   },
-  // ✅ Add Review (user or admin)
+  // Add Review (user or admin)
   addReview: async (req: Request, res: Response) => {
     try {
       const { name, image, rating, comment, addedBy } = req.body;
@@ -180,7 +180,7 @@ export const AgentController = {
     }
   },
 
-  // ✅ Get All Reviews
+  // Get All Reviews
   getReviews: async (req: Request, res: Response) => {
     try {
       const data = await AgentService.getReviews(req.params.id);
