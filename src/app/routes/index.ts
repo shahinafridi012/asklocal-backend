@@ -11,12 +11,15 @@ import { BlogRoutes } from "../modules/Main-Site/BlogManagement/blogManagement.r
 import { AgentsRoute } from "../modules/Main-Site/AgentManagement/agent.route";
 import { PagesRoute } from "../modules/Main-Site/HowToHub/Pages/page.route";
 import { MetricsRoutes } from "../modules/Main-Site/metrics/metrics.route";
-import {  HomepageTestimonialRoutes } from "../modules/Main-Site/Testimonials/homepageTestimonial.route";
+import { HomepageTestimonialRoutes } from "../modules/Main-Site/Testimonials/homepageTestimonial.route";
 import { AdminRoutes } from "../modules/Main-Site/admin/admin.route";
 import { AuthRoutes } from "../modules/Main-Site/auth/auth.route";
 import { DashboardRoute } from "../modules/Dashboard/dashboard/dashboard.route";
 import { LoadfastListingRoutes } from "../modules/Main-Site/LoadfastListing/LoadfastListing.routes";
 import { StorefrontAgentConnectRoutes } from "../modules/Api/StoreFrontAgentConcisergeFlow/storefrontAgentConnect.routes";
+import { FaqRoutes } from "../modules/Main-Site/faq/faq.route";
+import { TermsRoutes } from "../modules/Main-Site/termsOfuse/page.route";
+import { PrivacyRoutes } from "../modules/Main-Site/PrivacyPolicy/page.route";
 
 const router = Router();
 
@@ -69,21 +72,33 @@ const moduleRoutes = [
     path: "/testimonial", // FIXED
     route: HomepageTestimonialRoutes,
   },
-   {
+  {
     path: "/admin", // FIXED
     route: AdminRoutes,
-  }, 
-   {
+  },
+  {
     path: "/", // FIXED
     route: DashboardRoute,
   },
-   {
+  {
     path: "/loadfastlistings", // FIXED
     route: LoadfastListingRoutes,
   },
-   {
+  {
     path: "/storefront-agent-connect", // FIXED
     route: StorefrontAgentConnectRoutes,
+  },
+  {
+    path: "/faq", // FIXED
+    route: FaqRoutes,
+  },
+  {
+    path: "/terms", // FIXED
+    route: TermsRoutes,
+  },
+  {
+    path: "/privacy", // FIXED
+    route: PrivacyRoutes,
   },
 ];
 
